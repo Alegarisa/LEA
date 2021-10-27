@@ -7,7 +7,74 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+
+```
+
+# Loading the data
+```{r}
+ea_raw <- read_sav(here("nopublishlea", "LEA EA W1.2 FINAL.sav"))
+
+view_df(ea_raw)
+
+data.frame(table(ea_raw$E0001.1)) # no duplicated ids
+
+```
+
+Participants that did not complete the survey:
+
+EE05 = 15% completed
+EE11 = 44% completed
+EM16 = 30% completed
+
+E2001.1 is where scales from wave 1 begin
+
+E2001.2 is where scales from wave 2 begin 
+
+
+# Intial cleaning
+```{r}
+ea_clean <- ea_raw %>% 
+  arrange(E0001.1) %>%
+  select(-2:-9, -11) # selecting out columns with metadata
 ```
 
 
+```{r}
 
+# in wave 1:
+ea_clean %>%
+  filter(StdyCond == 0) # 25 control cases
+
+ea_clean %>%
+  filter(StdyCond == 1) # 20 control cases
+```
+Next steps:
+
+- Identify which codes were used for no response, N/A, etc. 
+- Identify scales using HM's notes
+- use parent.Rmd to follow code to compute scales
+- Learn how to run EFA in R
+
+### SCALES ###
+
+# 01 = healthy emerging adulthood 
+Items 1 - 16 in section 2
+E2001.1 - E2016.1
+
+
+item 9: not sure if needs reverse coding
+exclude item 10: fill in the blanks (E2010_1.1, E2010_2.1, E2010_3.1)
+
+item 13 (E2013.1): needs reverse coding 
