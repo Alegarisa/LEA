@@ -50,6 +50,10 @@ ea_clean <- ea_raw %>%
   select(-2:-9, -11) # selecting out columns with metadata
 ```
 
+```{r}
+describe(ea_clean)
+```
+
 
 ```{r}
 
@@ -62,7 +66,7 @@ ea_clean %>%
 ```
 Next steps:
 
-- Identify which codes were used for no response, N/A, etc. 
+- Identify which codes were used for no response, N/A, etc. -> appears that it's only -99
 - Identify scales using HM's notes
 - use parent.Rmd to follow code to compute scales
 - Learn how to run EFA in R
@@ -72,9 +76,56 @@ Next steps:
 # 01 = healthy emerging adulthood 
 Items 1 - 16 in section 2
 E2001.1 - E2016.1
+response scale: 1 - 4 (strongly disagree - strongly agree)
+higher scores = better 
+
+item 9 = 	E2009.1 -> probably needs reverse coding
+item 10 = E2010_1.1, E2010_2.1, E2010_3.1 -> exclude (fill in blank)
+item 13 = E2013.1 -> needs reverse coding 
 
 
-item 9: not sure if needs reverse coding
-exclude item 10: fill in the blanks (E2010_1.1, E2010_2.1, E2010_3.1)
+# 02 = PSS-10 (stress scale)
+Items 1 - 10 in section 3
+E3001.1 - E3010.1
+response scale: 0 - 4 (never - very often)
+higher scores = more stress
 
-item 13 (E2013.1): needs reverse coding 
+item 4 = E3004.1 - needs reverse coding
+item 5 = E3005.1 - needs reverse coding
+item 7 = E3007.1 - needs reverse coding
+item 8 = E3008.1 - needs reverse coding
+
+
+#### EA-parent relationship scales ####
+items in section 4
+
+# 03 Closeness/warmth scale -> check with HM
+item 1 = Global relationship quality = E4001.1
+item 2 = humor = E4002.1
+item 3 = Tension (reverse coded) = E4003.1
+item 5 = Shared activities = E4005.1
+
+response scales: 
+item 1 = 0 - 10 (really bad - absoluetly perfect)
+items 2 and 3 = 1 - 5 (strongly disagree - strongly agree)
+item 5 = 1 - 5 (not at all - more than once a week)
+
+higher scores = better ***not sure if I can include these items in one scale given different response scales*** probably need to normalize -> learn this
+
+# 04 cultural diffs & conflict -> check with HM
+items 24 - 28
+E4024.1 - E4028.1
+response scale: 1 - 4 (strongly disagree - strongly agree)
+higher scores = less conflict
+
+item 24 = E4024.1 - needs reverse coding
+item 27 = E4027.1 - needs reverse coding
+
+# 05 Trust (?)
+items 31, 32, 34
+E4031.1, E4032.1, E4034.1
+response scale: 0 - 3 (not at all true - very true)
+higher scores = more trust
+
+
+
