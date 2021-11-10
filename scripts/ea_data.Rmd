@@ -38,9 +38,10 @@ EE05 = 15% completed
 EE11 = 44% completed
 EM16 = 30% completed
 
-E2001.1 is where scales from wave 1 begin
+E2001.1 is where items from wave 1 begin
 
-E2001.2 is where scales from wave 2 begin 
+E2001.2 is where items from wave 2 begin, but E103.2
+E103.2_Text is where wave 2 variables begin.
 
 
 # Intial cleaning
@@ -57,6 +58,8 @@ describe(ea_clean)
 
 ```{r}
 
+view_df(ea_clean)
+
 # in wave 1:
 ea_clean %>%
   filter(StdyCond == 0) # 25 control cases
@@ -64,12 +67,14 @@ ea_clean %>%
 ea_clean %>%
   filter(StdyCond == 1) # 20 control cases
 ```
+
 Next steps:
 
 - Identify which codes were used for no response, N/A, etc. -> appears that it's only -99
 - Identify scales using HM's notes
 - use parent.Rmd to follow code to compute scales
 - Learn how to run EFA in R
+- search "HM" to id questions I have for Heather
 
 ### SCALES ###
 
@@ -79,27 +84,29 @@ E2001.1 - E2016.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
 higher scores = better 
 
-item 9 = 	E2009.1 -> probably needs reverse coding
+item 9 = 	E2009.1 -> probably needs reverse scoring -> check with HM
 item 10 = E2010_1.1, E2010_2.1, E2010_3.1 -> exclude (fill in blank)
-item 13 = E2013.1 -> needs reverse coding 
+item 13 = E2013.1 -> needs reverse scoring 
+
+- Run EFA?
 
 
-# 02 = PSS-10 (stress scale)
+# 02 = PSS-10 (stress scale) -> check with HM reverse scoring items
 Items 1 - 10 in section 3
 E3001.1 - E3010.1
 response scale: 0 - 4 (never - very often)
 higher scores = more stress
 
-item 4 = E3004.1 - needs reverse coding
-item 5 = E3005.1 - needs reverse coding
-item 7 = E3007.1 - needs reverse coding
-item 8 = E3008.1 - needs reverse coding
+item 4 = E3004.1 - needs reverse scoring
+item 5 = E3005.1 - needs reverse scoring
+item 7 = E3007.1 - needs reverse scoring
+item 8 = E3008.1 - needs reverse scoring
 
 
 #### EA-parent relationship scales ####
 items in section 4
 
-# 03 Closeness/warmth scale -> check with HM
+# 03 Closeness/warmth scale in Aquilino (1999) -> check with HM need
 item 1 = Global relationship quality = E4001.1
 item 2 = humor = E4002.1
 item 3 = Tension (reverse coded) = E4003.1
@@ -109,23 +116,64 @@ response scales:
 item 1 = 0 - 10 (really bad - absoluetly perfect)
 items 2 and 3 = 1 - 5 (strongly disagree - strongly agree)
 item 5 = 1 - 5 (not at all - more than once a week)
+higher scores = better 
 
-higher scores = better ***not sure if I can include these items in one scale given different response scales*** probably need to normalize -> learn this
+***not sure if I can include these items in one scale given different response scales*** probably need to normalize -> I need to learn how to do this
 
-# 04 cultural diffs & conflict -> check with HM
+# 04 cultural diffs & conflict -> check with HM need
 items 24 - 28
 E4024.1 - E4028.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
 higher scores = less conflict
 
-item 24 = E4024.1 - needs reverse coding
-item 27 = E4027.1 - needs reverse coding
+item 24 = E4024.1 - needs reverse scoring
+item 27 = E4027.1 - needs reverse scoring
 
-# 05 Trust (?)
-items 31, 32, 34
+# 05 (?) -> check items with HM to come with a name
+items 21, 22 -> can these also be trust?
+E4021.1, E4022.1
+response scale: 1 - 4 (strongly disagree - strongly agree)
+
+items 31, 32, 34 -> these can be trust
 E4031.1, E4032.1, E4034.1
 response scale: 0 - 3 (not at all true - very true)
-higher scores = more trust
+higher scores = more (?)
 
+# 06 language comfort -> check with HM which
+items 48 and 49 in section 5
+E5048_1.1 - E5049_5.1
+response scale: 1 - 5 (Not at all comf. - Very comf.)
+higher scores = more comfort with each language
+
+- Which ones we want to include: SPA/ENG at home, school, work, friends, in general?
+- Or make a composite of all?
+
+# 07 friend group & alcohol use -> check with HM EFA
+items 1 - 27 in section 6
+E6001.1 - E6027.1
+response scale: 1 - 4 (strongly disagree - strongly agree)
+
+items 1 - 10 higher scores = more risky drinking 
+items 11 - 22 higher scores = more harm reduction strategies
+items 24-27 are not as clear to me. 
+
+- Run EFA - one scale and reverse score items 11 and above? or simply create 2 scales (risky drinking & harm reduction)?
+- check with HM need of scale with items 28 - 41 about friend group? 
+
+# 08 alcohol use (Monitoring the future)
+items 1 - 15 in section 7 
+
+- HM: choose items or run EFA?
+
+# Demographics variables
+items 1 - 24 in section 10
+E1001_1.1
+- HM: need to include these in the dataset?
+- a lot of items are mark all that apply -> HM: what to do?
+
+
+***What is the end result of the dataset?*** -> ask HM
+
+Attach the scales I create at the end of the original dataset or create a new dataset with only ids, condition, state, created scales (for wave 1 and 2, right?), and demo vars?
 
 
