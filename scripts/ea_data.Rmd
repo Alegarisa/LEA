@@ -53,6 +53,7 @@ ea_clean <- ea_raw %>%
 
 ```{r}
 describe(ea_clean)
+
 ```
 
 
@@ -76,6 +77,39 @@ Next steps:
 - Learn how to run EFA in R
 - search "HM" to id questions I have for Heather
 
+# recoding missing values as N/A with function
+```{r}
+# vector with missing values in dataset
+missing_vals <- c(-99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(-99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(-99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+ea_clean_na <- recode_missing_df(ea_clean) # applying this function strips out labels
+```
+
+# reverse scoring 
+
+```{r}
+ea_clean_rv <- ea_clean_na %>%
+  mutate(E2009.1 = likert_reverse(E2009.1, top = 4, bottom = 1),
+         E2013.1 = likert_reverse(E2013.1, top = 4, bottom = 1),
+         E3004.1 = likert_reverse(E3004.1, top = 5, bottom = 1),
+         E3005.1 = likert_reverse(E3005.1, top = 5, bottom = 1),
+         E3007.1 = likert_reverse(E3007.1, top = 5, bottom = 1),
+         E3008.1 = likert_reverse(E3008.1, top = 5, bottom = 1),
+         E4024.1 = likert_reverse(E4024.1, top = 4, bottom = 1),
+         E4027.1 = likert_reverse(E4027.1, top = 4, bottom = 1))
+```
+
 ### SCALES ###
 
 # 01 = healthy emerging adulthood 
@@ -84,12 +118,30 @@ E2001.1 - E2016.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
 higher scores = better 
 
-item 9 = 	E2009.1 -> probably needs reverse scoring -> check with HM
-item 10 = E2010_1.1, E2010_2.1, E2010_3.1 -> exclude (fill in blank)
-item 13 = E2013.1 -> needs reverse scoring 
+item 9 = 	E2009.1 -> reverse scored
+item 10 = E2010_1.1, E2010_2.1, E2010_3.1 -> excluded
+item 13 = E2013.1 -> reverse scored
 
-- Run EFA?
+- Run EFA? -> EVALUATE WITH WED. DEADLINE. IF NOT, FACE VALIDITY AND SIMPLE RELIABILITY. FIRST RUN ALPHA, IF STRONG, KEEP. 
 
+```{r}
+
+s01 <- ea_clean_rv %>%
+  select(E2001.1:E2016.1) %>% 
+  select(-E2010_1.1, -E2010_2.1, -E2010_3.1)
+  data.frame() 
+
+alpha(s01, check.keys=FALSE) # 0.70
+
+# E2009.1 is negatively correlated wth total scale despite rev score. The item could have been misinterpreted, so I am dropping it. 
+
+s01 <- ea_clean_rv %>%
+  select(E2001.1:E2016.1) %>% 
+  select(-E2009.1,-E2010_1.1, -E2010_2.1, -E2010_3.1)
+  data.frame() 
+
+alpha(s01, check.keys=FALSE) # 0.78 healthy adulting                                                                                                                           
+```
 
 # 02 = PSS-10 (stress scale) -> check with HM reverse scoring items
 Items 1 - 10 in section 3
@@ -97,11 +149,19 @@ E3001.1 - E3010.1
 response scale: 0 - 4 (never - very often)
 higher scores = more stress
 
-item 4 = E3004.1 - needs reverse scoring
-item 5 = E3005.1 - needs reverse scoring
-item 7 = E3007.1 - needs reverse scoring
-item 8 = E3008.1 - needs reverse scoring
+item 4 = E3004.1 - reverse scored
+item 5 = E3005.1 - reverse scored
+item 7 = E3007.1 - reverse scored
+item 8 = E3008.1 - reverse scored
 
+```{r}
+
+s02 <- ea_clean_rv %>%
+  select(E3001.1:E3010.1) %>% 
+  data.frame() 
+
+alpha(s02, check.keys=FALSE) # 0.82 stress
+```
 
 #### EA-parent relationship scales ####
 items in section 4
@@ -109,16 +169,26 @@ items in section 4
 # 03 Closeness/warmth scale in Aquilino (1999) -> check with HM need
 item 1 = Global relationship quality = E4001.1
 item 2 = humor = E4002.1
-item 3 = Tension (reverse coded) = E4003.1
 item 5 = Shared activities = E4005.1
 
 response scales: 
 item 1 = 0 - 10 (really bad - absoluetly perfect)
-items 2 and 3 = 1 - 5 (strongly disagree - strongly agree)
+item 2 = 1 - 5 (strongly disagree - strongly agree)
 item 5 = 1 - 5 (not at all - more than once a week)
 higher scores = better 
 
 ***not sure if I can include these items in one scale given different response scales*** probably need to normalize -> I need to learn how to do this
+
+```{r}
+# s03 <- ea_clean_rv %>%
+#   select(E4001.1, E4002.1, E4005.1) %>% 
+#   data.frame() 
+# 
+# alpha(s03, check.keys=FALSE) # 0.82 warmth
+
+###### I am not sure if alpha can be done with items with different response options and response scales (1-5 and 0-10) ######
+```
+
 
 # 04 cultural diffs & conflict -> check with HM need
 items 24 - 28
@@ -126,18 +196,38 @@ E4024.1 - E4028.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
 higher scores = less conflict
 
-item 24 = E4024.1 - needs reverse scoring
-item 27 = E4027.1 - needs reverse scoring
+item 24 = E4024.1 - reverse scored
+item 27 = E4027.1 - reverse scored
 
-# 05 (?) -> check items with HM to come with a name
+```{r}
+# s04 <- ea_clean_rv %>%
+#   select(E4024.1:E4028.1) %>% 
+#   data.frame() 
+# 
+# alpha(s04, check.keys=FALSE) # 0.21 cultural conflict
+
+######## really poor alpha, hence not using this scale ########
+```
+
+
+# 05 (EA-Parent rel. quality) -> check items with HM to come with a name ... ALPHA WILL TELL US
 items 21, 22 -> can these also be trust?
 E4021.1, E4022.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
 
 items 31, 32, 34 -> these can be trust
-E4031.1, E4032.1, E4034.1
-response scale: 0 - 3 (not at all true - very true)
-higher scores = more (?)
+E4031.1, E4032.1, E4034.1 -> INCLUDE E4033.1 AND CHECK ALPHA
+response scale: 0 - 3 (not at all true - very true) but same values
+higher scores = more trust
+
+```{r}
+s05 <- ea_clean_rv %>%
+  select(E4021.1, E4022.1, E4031.1, E4032.1, E4033.1, E4034.1) %>% 
+  data.frame() 
+
+alpha(s05, check.keys=FALSE) # 0.82 parent - ea rel. quality (trust?)
+```
+
 
 # 06 language comfort -> check with HM which
 items 48 and 49 in section 5
@@ -145,7 +235,7 @@ E5048_1.1 - E5049_5.1
 response scale: 1 - 5 (Not at all comf. - Very comf.)
 higher scores = more comfort with each language
 
-- Which ones we want to include: SPA/ENG at home, school, work, friends, in general?
+- Which ones we want to include: SPA/ENG at home, school, work, friends, in general? -> JUST FOCUS ON IN GENERAL
 - Or make a composite of all?
 
 # 07 friend group & alcohol use -> check with HM EFA
@@ -160,20 +250,26 @@ items 24-27 are not as clear to me.
 - Run EFA - one scale and reverse score items 11 and above? or simply create 2 scales (risky drinking & harm reduction)?
 - check with HM need of scale with items 28 - 41 about friend group? 
 
+START WITH 2 SCALES
+
 # 08 alcohol use (Monitoring the future)
 items 1 - 15 in section 7 
+START IN E7001.1
 
-- HM: choose items or run EFA?
+- HM: choose items or run EFA? -> USE JUST INDIVIDUAL ITEMS
 
 # Demographics variables
 items 1 - 24 in section 10
 E1001_1.1
 - HM: need to include these in the dataset?
-- a lot of items are mark all that apply -> HM: what to do?
+- a lot of items are mark all that apply -> HM: what to do? -- ITS FINE. 
 
 
 ***What is the end result of the dataset?*** -> ask HM
 
-Attach the scales I create at the end of the original dataset or create a new dataset with only ids, condition, state, created scales (for wave 1 and 2, right?), and demo vars?
+Attach the scales I create at the end of the original dataset or create a new dataset with only ids, condition, state, created scales (for wave 1 and 2, right? -> YES, RIGHT), and demo vars?
 
+HAVE A DATASET WITH ONLY THESE VARS. 
+
+COPY AND PASTE SYNRTAX HOW I AM CONSTRUCTING SCALES. 
 
