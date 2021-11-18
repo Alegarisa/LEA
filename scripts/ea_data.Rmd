@@ -106,9 +106,17 @@ ea_clean_rv <- ea_clean_na %>%
          E3005.1 = likert_reverse(E3005.1, top = 5, bottom = 1),
          E3007.1 = likert_reverse(E3007.1, top = 5, bottom = 1),
          E3008.1 = likert_reverse(E3008.1, top = 5, bottom = 1),
+         E4003.1 = likert_reverse(E4003.1, top = 5, bottom = 1),
          E4024.1 = likert_reverse(E4024.1, top = 4, bottom = 1),
          E4027.1 = likert_reverse(E4027.1, top = 4, bottom = 1))
 ```
+
+# Common guidelines for evaluating Cronbach's Alpha
+
+.00 to .69 = Poor
+.70 to .79 = Fair 
+.80 to .89 = Good 
+.90 to .99 = Excellent/Strong
 
 ### SCALES ###
 
@@ -140,10 +148,11 @@ s01 <- ea_clean_rv %>%
   select(-E2009.1,-E2010_1.1, -E2010_2.1, -E2010_3.1)
   data.frame() 
 
-alpha(s01, check.keys=FALSE) # 0.78 healthy adulting                                                                                                                           
+alpha(s01, check.keys=FALSE) # 0.78 healthy adulting
+
 ```
 
-# 02 = PSS-10 (stress scale) -> check with HM reverse scoring items
+# 02 = PSS-10 (stress scale)
 Items 1 - 10 in section 3
 E3001.1 - E3010.1
 response scale: 0 - 4 (never - very often)
@@ -169,28 +178,29 @@ items in section 4
 # 03 Closeness/warmth scale in Aquilino (1999) -> check with HM need
 item 1 = Global relationship quality = E4001.1
 item 2 = humor = E4002.1
+item 3 = tension = E4003.1 (needs reverse score)
 item 5 = Shared activities = E4005.1
 
 response scales: 
 item 1 = 0 - 10 (really bad - absoluetly perfect)
 item 2 = 1 - 5 (strongly disagree - strongly agree)
+item 3 = 1 - 5 (strongly disagree - strongly agree) - reverse scored
 item 5 = 1 - 5 (not at all - more than once a week)
 higher scores = better 
 
 ***not sure if I can include these items in one scale given different response scales*** probably need to normalize -> I need to learn how to do this
 
 ```{r}
-# s03 <- ea_clean_rv %>%
-#   select(E4001.1, E4002.1, E4005.1) %>% 
-#   data.frame() 
-# 
-# alpha(s03, check.keys=FALSE) # 0.82 warmth
+s03 <- ea_clean_rv %>%
+  select(E4001.1, E4002.1, E4003.1, E4005.1) %>%
+  data.frame()
 
-###### I am not sure if alpha can be done with items with different response options and response scales (1-5 and 0-10) ######
+alpha(s03, check.keys=FALSE) # 0.71 warmth (fair)
+
+###### I am not completely sure if alpha can be done with items with different response options and response scales (1-5 and 0-10) ######
 ```
 
-
-# 04 cultural diffs & conflict -> check with HM need
+# 04 cultural diffs & conflict -> NOT USING THIS ONE
 items 24 - 28
 E4024.1 - E4028.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
@@ -201,16 +211,16 @@ item 27 = E4027.1 - reverse scored
 
 ```{r}
 # s04 <- ea_clean_rv %>%
-#   select(E4024.1:E4028.1) %>% 
-#   data.frame() 
+#   select(E4024.1:E4028.1) %>%
+#   data.frame()
 # 
 # alpha(s04, check.keys=FALSE) # 0.21 cultural conflict
 
 ######## really poor alpha, hence not using this scale ########
+
 ```
 
-
-# 05 (EA-Parent rel. quality) -> check items with HM to come with a name ... ALPHA WILL TELL US
+# 05 (EA-Parent rel. quality)
 items 21, 22 -> can these also be trust?
 E4021.1, E4022.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
@@ -228,7 +238,6 @@ s05 <- ea_clean_rv %>%
 alpha(s05, check.keys=FALSE) # 0.82 parent - ea rel. quality (trust?)
 ```
 
-
 # 06 language comfort -> check with HM which
 items 48 and 49 in section 5
 E5048_1.1 - E5049_5.1
@@ -236,15 +245,21 @@ response scale: 1 - 5 (Not at all comf. - Very comf.)
 higher scores = more comfort with each language
 
 - Which ones we want to include: SPA/ENG at home, school, work, friends, in general? -> JUST FOCUS ON IN GENERAL
-- Or make a composite of all?
+
+```{r}
+ea_clean_rv$E5048_5.1 # comfort in SPA in general
+
+ea_clean_rv$E5049_5.1 # comfort in ENG in general
+
+```
 
 # 07 friend group & alcohol use -> check with HM EFA
 items 1 - 27 in section 6
 E6001.1 - E6027.1
 response scale: 1 - 4 (strongly disagree - strongly agree)
 
-items 1 - 10 higher scores = more risky drinking 
-items 11 - 22 higher scores = more harm reduction strategies
+items 1 - 10 higher scores = more risky drinking (tendency to binge drink)
+items 11 - 23 higher scores = more harm reduction strategies
 items 24-27 are not as clear to me. 
 
 - Run EFA - one scale and reverse score items 11 and above? or simply create 2 scales (risky drinking & harm reduction)?
@@ -252,24 +267,104 @@ items 24-27 are not as clear to me.
 
 START WITH 2 SCALES
 
+```{r}
+s07 <- ea_clean_rv %>%
+  select(E6001.1:E6010.1) %>% 
+  data.frame() 
+
+alpha(s07, check.keys=FALSE) # 0.93 tendency to binge drink among friends
+```
+
+```{r}
+s07_2 <- ea_clean_rv %>%
+  select(E6011.1:E6023.1) %>% 
+  data.frame() 
+
+alpha(s07_2, check.keys=FALSE) # 0.93 harm reduction strategies
+```
+
 # 08 alcohol use (Monitoring the future)
 items 1 - 15 in section 7 
-START IN E7001.1
+START IN E7001.1 -  JUST INDIVIDUAL ITEMS
 
-- HM: choose items or run EFA? -> USE JUST INDIVIDUAL ITEMS
+```{r}
+moni_fut <- ea_clean_rv %>%
+  select(E0001.1, ResponseId, StdyCond, E0003.1, LocationRC.1, E7001.1:E7015.1) %>% 
+  data.frame() 
+```
 
-# Demographics variables
+
+# Demographic variables
 items 1 - 24 in section 10
 E1001_1.1
 - HM: need to include these in the dataset?
-- a lot of items are mark all that apply -> HM: what to do? -- ITS FINE. 
+- a lot of items are mark all that apply -> HM: LEAVE THEM AS THEY ARE
+
+```{r}
+dems <- ea_clean %>%
+  select(E5048_5.1, E5049_5.1, E0001.1, ResponseId, StdyCond, E0003.1, LocationRC.1, E1001_1.1:E1024_5.1_TEXT) %>% 
+  data.frame() # I did not apply the N/A function to not strip out variable labels
+```
 
 
 ***What is the end result of the dataset?*** -> ask HM
 
-Attach the scales I create at the end of the original dataset or create a new dataset with only ids, condition, state, created scales (for wave 1 and 2, right? -> YES, RIGHT), and demo vars?
+- New dataset with only ids, condition, state, created scales (for wave 1 and 2), and demo vars
 
-HAVE A DATASET WITH ONLY THESE VARS. 
+- Share syntax OF HOW SCALES WERE CONSTRUCTED with HM
 
-COPY AND PASTE SYNRTAX HOW I AM CONSTRUCTING SCALES. 
+### copying variable names for composites for HM
 
+# Healthy EAing (alpha w1 = 0.78)
+HLTYEA.1 = (E2001.1, E2002.1, E2003.1, E2004.1, E2005.1, E2006.1, E2007.1, E2008.1, E2011.1, E2012.1, E2013.1, E2014.1, E2015.1, E2016.1)
+
+HLTYEA.2 = (E2001.2, E2002.2, E2003.2, E2004.2, E2005.2, E2006.2, E2007.2, E2008.2, E2011.2, E2012.2, E2013.2, E2014.2, E2015.2, E2016.2)
+
+# PSS (alpha w1 = 0.82)
+PSS.1 = (E3001.1, E3002.1, E3003.1, E3004.1, E3005.1, E3006.1, E3007.1, E3008.1, E3009.1, E3010.1)
+PSS.2 = (E3001.2, E3002.2, E3003.2, E3004.2, E3005.2, E3006.2, E3007.2, E3008.2, E3009.2, E3010.2)
+
+# EA-Parent rel. quality (trust) (alpha w1 = 0.82) 
+RELQ.1 = (E4021.1, E4022.1, E4031.1, E4032.1, E4033.1, E4034.1)
+RELQ.2 = (E4021.2, E4022.2, E4031.2, E4032.2, E4033.2, E4034.2)
+
+# binge drinking (alpha w1 = 0.93)
+BINGE.1 = (E6001.1, E6002.1, E6003.1, E6004.1, E6005.1, E6006.1, E6007.1, E6008.1, E6009.1, E6010.1)
+BINGE.2 = (E6001.2, E6002.2, E6003.2, E6004.2, E6005.2, E6006.2, E6007.2, E6008.2, E6009.2, E6010.2)
+
+# harm reduction strategies (alpha w1 = 0.93)
+HARMRED.1 = (E6011.1, E6012.1, E6013.1, E6014.1, E6015.1, E6016.1, E6017.1, E6018.1, E6019.1, E6020.1, E6021.1, E6022.1, E6023.1)
+HARMRED.1 = (E6011.2, E6012.2, E6013.2, E6014.2, E6015.2, E6016.2, E6017.2, E6018.2, E6019.2, E6020.2, E6021.2, E6022.2, E6023.2)
+
+### composite scales with acceptable consistency
+
+```{r}
+composite_scales <- ea_clean_rv %>%
+  rowwise() %>% 
+  mutate(HLTYEA.1 = mean(c(E2001.1, E2002.1, E2003.1, E2004.1, E2005.1, E2006.1, E2007.1, E2008.1, E2011.1, E2012.1, E2013.1, E2014.1, E2015.1, E2016.1), na.rm = TRUE),
+         HLTYEA.2 = mean(c(E2001.2, E2002.2, E2003.2, E2004.2, E2005.2, E2006.2, E2007.2, E2008.2, E2011.2, E2012.2, E2013.2, E2014.2, E2015.2, E2016.2), na.rm = TRUE),
+         PSS.1 = mean(c(E3001.1, E3002.1, E3003.1, E3004.1, E3005.1, E3006.1, E3007.1, E3008.1, E3009.1, E3010.1), na.rm = TRUE),
+         PSS.2 = mean(c(E3001.2, E3002.2, E3003.2, E3004.2, E3005.2, E3006.2, E3007.2, E3008.2, E3009.2, E3010.2), na.rm = TRUE),
+         RELQ.1 = mean(c(E4021.1, E4022.1, E4031.1, E4032.1, E4033.1, E4034.1), na.rm = TRUE),
+         RELQ.2 = mean(c(E4021.2, E4022.2, E4031.2, E4032.2, E4033.2, E4034.2), na.rm = TRUE),
+         BINGE.1 = mean(c(E6001.1, E6002.1, E6003.1, E6004.1, E6005.1, E6006.1, E6007.1, E6008.1, E6009.1, E6010.1), na.rm = TRUE),
+         BINGE.2 = mean(c(E6001.2, E6002.2, E6003.2, E6004.2, E6005.2, E6006.2, E6007.2, E6008.2, E6009.2, E6010.2), na.rm = TRUE),
+         HARMRED.1 = mean(c(E6011.1, E6012.1, E6013.1, E6014.1, E6015.1, E6016.1, E6017.1, E6018.1, E6019.1, E6020.1, E6021.1, E6022.1, E6023.1), na.rm = TRUE),
+         HARMRED.2 = mean(c(E6011.2, E6012.2, E6013.2, E6014.2, E6015.2, E6016.2, E6017.2, E6018.2, E6019.2, E6020.2, E6021.2, E6022.2, E6023.2), na.rm = TRUE)) %>%
+  select(E0001.1, ResponseId, StdyCond, E0003.1, LocationRC.1, HLTYEA.1, HLTYEA.2, PSS.1, PSS.2, RELQ.1, RELQ.2, BINGE.1, BINGE.2, HARMRED.1, HARMRED.2) # selecting only id variables and the new scales
+
+```
+
+
+```{r}
+
+final_ea <- left_join(ea_clean, composite_scales)
+
+view_df(final_ea)
+```
+
+# exporting dataset to SPSS
+```{r}
+final_ea %>%
+  haven::write_sav(here("nopublishlea", "final_ea.sav")) 
+```
