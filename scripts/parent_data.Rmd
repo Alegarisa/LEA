@@ -1,0 +1,120 @@
+---
+title: "parent_data"
+author: "Alejandra Garcia Isaza"
+date: "11/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(haven)
+library(janitor)
+library(knitr)
+library(surveytoolbox)
+library(sjPlot)
+library(kableExtra)
+library(psych)
+library(sjmisc)
+```
+
+
+# Loading the data
+```{r}
+pa_raw <- read_sav(here("nopublishlea", "LEA Parent W1.2 FINAL.sav"))
+
+view_df(pa_raw)
+
+data.frame(table(pa_raw$P0001.1)) # no duplicated ids
+
+pa_raw %>%
+  filter(Finished == 0)
+```
+
+Participants that did not complete the survey:
+
+PM05 = 87% completed
+
+P2001.1 is where items from wave 1 begin
+
+P2001.2 is where items from wave 2 begin, but P1003.2
+P1003.2_TEXT is where wave 2 variables begin.
+
+# Intial cleaning
+```{r}
+pa_clean <- pa_raw %>% 
+  arrange(P0001.1) %>%
+  select(-2:-9, -11) %>% # selecting out columns with metadata
+  filter(P0001.1 != "XXXX") # removing data with odd id
+```
+
+```{r}
+view_df(pa_clean)
+
+# in wave 1:
+pa_clean %>%
+  filter(E0002.1 == 0) # 19 control cases
+
+pa_clean %>%
+  filter(E0002.1 == 1) # 19 control cases
+```
+
+<!-- between P2007.1 and P2009.1, the values get mixed up. The scale was 1,2,3,4,5 and what was coded on Qualtrics was 1,2,4,6,7 (needs fixing, but later) --> 
+
+between P2021.1 and P2033.1 (& w2: P2021.2 and P2033.2) the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,2,4,5 --> needs fixing NOW
+
+between P2034.1 and P2037.1 (& w2: P2034.2 and P2037.2) the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,2,6,7 --> needs fixing NOW
+
+P2038.1 and P2062.1 (& w2: P2038.2 and P2062.2)the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,3,5,7 --> needs fixing NOW
+
+P3001.1 - P3010.1 (& w2: P3001.2 - P3010.2) = PSS 
+scale needs change: original 0-4, current 1 - 5 --> needs fixing NOW
+
+SPA general: P4013_5.1 --> response scales OK
+
+eng general: P4014_5.1 --> response scales OK
+
+P7001.1 - P70012.1 (& w2: P7001.2 - P70012.2) = future orientation -- scale needs change: original 0-3, current 1 - 4 --> needs fixing NOW 
+
+```{r}
+# pa_clean_2 <- pa_clean %>%
+#   mutate(P2021.1 = ifelse(P2021.1 == 4, 3, P2021.1),
+#          P2021.1 = ifelse(P2021.1 == 5, 4, P2021.1),
+#          P2021.2 = ifelse(P2021.1 == 4, 3, P2021.1),
+#          P2021.2 = ifelse(P2021.1 == 5, 4, P2021.1))
+
+```
+
+
+take this function and apply it several times. 
+
+```{r}
+# recoding incorrect values as N/A with function
+
+# vector with incorrect values in dataset
+vals <- c(4)
+
+# function that returns true if values in vector are equal to vals. The function takes a vector x, and specified values of incorrect data
+recode_incorrect <- function(x, vals = c(4)) {
+  test <- x %in% vals
+  ifelse(test, 3, x)
+}
+
+# function that recodes incorrect values to 3. The function takes a dataframe with variables with incorrect data, and specified values of incorrect data
+recode_incorrect_df <- function(df, vals = c(4)) {
+  modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
+}
+
+```
+
+
+```{r}
+pa_clean_d1 <- pa_clean %>%
+  select(P2021.1:P2033.1 | P2021.2:P2033.2)
+
+test_d <- recode_incorrect_df(pa_clean_d1) # applying this function strips out labels
+```
+
