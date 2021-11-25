@@ -26,12 +26,10 @@ library(sjmisc)
 ```{r}
 pa_raw <- read_sav(here("nopublishlea", "LEA Parent W1.2 FINAL.sav"))
 
-view_df(pa_raw)
+# data.frame(table(pa_raw$P0001.1)) # no duplicated ids
 
-data.frame(table(pa_raw$P0001.1)) # no duplicated ids
-
-pa_raw %>%
-  filter(Finished == 0)
+# pa_raw %>%
+#   filter(Finished == 0)
 ```
 
 Participants that did not complete the survey:
@@ -44,52 +42,32 @@ P2001.2 is where items from wave 2 begin, but P1003.2
 P1003.2_TEXT is where wave 2 variables begin.
 
 # Intial cleaning
-```{r}
+```{r, echo=T, results='hide'}
 pa_clean <- pa_raw %>% 
   arrange(P0001.1) %>%
   select(-2:-9, -11) %>% # selecting out columns with metadata
   filter(P0001.1 != "XXXX") # removing data with odd id
 ```
 
-```{r}
-view_df(pa_clean)
+```{r, echo=T, results='hide'}
 
 # in wave 1:
 pa_clean %>%
   filter(E0002.1 == 0) # 19 control cases
 
 pa_clean %>%
-  filter(E0002.1 == 1) # 19 control cases
+  filter(E0002.1 == 1) # 19 intervention cases
 ```
 
 <!-- between P2007.1 and P2009.1, the values get mixed up. The scale was 1,2,3,4,5 and what was coded on Qualtrics was 1,2,4,6,7 (needs fixing, but later) --> 
 
 between P2021.1 and P2033.1 (& w2: P2021.2 and P2033.2) the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,2,4,5 --> needs fixing NOW
 
-between P2034.1 and P2037.1 (& w2: P2034.2 and P2037.2) the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,2,6,7 --> needs fixing NOW
-
-P2038.1 and P2062.1 (& w2: P2038.2 and P2062.2)the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,3,5,7 --> needs fixing NOW
-
-P3001.1 - P3010.1 (& w2: P3001.2 - P3010.2) = PSS 
-scale needs change: original 0-4, current 1 - 5 --> needs fixing NOW
-
-SPA general: P4013_5.1 --> response scales OK
-
-eng general: P4014_5.1 --> response scales OK
-
-P7001.1 - P70012.1 (& w2: P7001.2 - P70012.2) = future orientation -- scale needs change: original 0-3, current 1 - 4 --> needs fixing NOW 
-
 ```{r}
-# pa_clean_2 <- pa_clean %>%
-#   mutate(P2021.1 = ifelse(P2021.1 == 4, 3, P2021.1),
-#          P2021.1 = ifelse(P2021.1 == 5, 4, P2021.1),
-#          P2021.2 = ifelse(P2021.1 == 4, 3, P2021.1),
-#          P2021.2 = ifelse(P2021.1 == 5, 4, P2021.1))
-
+fix_1 <- pa_clean %>%
+  select(P0001.1, P2021.1:P2033.1 | P2021.2:P2033.2)
 ```
 
-
-take this function and apply it several times. 
 
 ```{r}
 # recoding incorrect values as N/A with function
@@ -108,13 +86,345 @@ recode_incorrect_df <- function(df, vals = c(4)) {
   modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
 }
 
+fix_1 <- recode_incorrect_df(fix_1) # applying this function strips out labels
+```
+
+```{r}
+# recoding incorrect values as N/A with function
+
+# vector with incorrect values in dataset
+vals <- c(5)
+
+# function that returns true if values in vector are equal to vals. The function takes a vector x, and specified values of incorrect data
+recode_incorrect <- function(x, vals = c(5)) {
+  test <- x %in% vals
+  ifelse(test, 4, x)
+}
+
+# function that recodes incorrect values to 3. The function takes a dataframe with variables with incorrect data, and specified values of incorrect data
+recode_incorrect_df <- function(df, vals = c(5)) {
+  modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
+}
+
+fix_1.2 <- recode_incorrect_df(fix_1) # applying this function strips out labels
+```
+
+between P2034.1 and P2037.1 (& w2: P2034.2 and P2037.2) the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,2,6,7 --> needs fixing NOW
+
+```{r}
+fix_2 <- pa_clean %>%
+  select(P0001.1, P2034.1:P2037.1 | P2034.2:P2037.2)
 ```
 
 
 ```{r}
-pa_clean_d1 <- pa_clean %>%
-  select(P2021.1:P2033.1 | P2021.2:P2033.2)
+# recoding incorrect values as N/A with function
 
-test_d <- recode_incorrect_df(pa_clean_d1) # applying this function strips out labels
+# vector with incorrect values in dataset
+vals <- c(6)
+
+# function that returns true if values in vector are equal to vals. The function takes a vector x, and specified values of incorrect data
+recode_incorrect <- function(x, vals = c(6)) {
+  test <- x %in% vals
+  ifelse(test, 3, x)
+}
+
+# function that recodes incorrect values to 3. The function takes a dataframe with variables with incorrect data, and specified values of incorrect data
+recode_incorrect_df <- function(df, vals = c(6)) {
+  modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
+}
+
+fix_2 <- recode_incorrect_df(fix_2) # applying this function strips out labels
 ```
 
+
+```{r}
+# recoding incorrect values as N/A with function
+
+# vector with incorrect values in dataset
+vals <- c(7)
+
+# function that returns true if values in vector are equal to vals. The function takes a vector x, and specified values of incorrect data
+recode_incorrect <- function(x, vals = c(7)) {
+  test <- x %in% vals
+  ifelse(test, 4, x)
+}
+
+# function that recodes incorrect values to 3. The function takes a dataframe with variables with incorrect data, and specified values of incorrect data
+recode_incorrect_df <- function(df, vals = c(7)) {
+  modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
+}
+
+fix_2.2 <- recode_incorrect_df(fix_2) # applying this function strips out labels
+```
+
+P2038.1 and P2062.1 (& w2: P2038.2 and P2062.2)the values get mixed up. The scale was 1,2,3,4 and what was coded on Qualtrics was 1,3,5,7 --> needs fixing NOW
+
+```{r}
+fix_3 <- pa_clean %>%
+  select(P0001.1, P2038.1:P2062.1 | P2038.2:P2062.2)
+```
+
+
+```{r}
+# recoding incorrect values as N/A with function
+
+# vector with incorrect values in dataset
+vals <- c(3)
+
+# function that returns true if values in vector are equal to vals. The function takes a vector x, and specified values of incorrect data
+recode_incorrect <- function(x, vals = c(3)) {
+  test <- x %in% vals
+  ifelse(test, 2, x)
+}
+
+# function that recodes incorrect values to 3. The function takes a dataframe with variables with incorrect data, and specified values of incorrect data
+recode_incorrect_df <- function(df, vals = c(3)) {
+  modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
+}
+
+fix_3 <- recode_incorrect_df(fix_3) # applying this function strips out labels
+```
+
+```{r}
+# recoding incorrect values as N/A with function
+
+# vector with incorrect values in dataset
+vals <- c(5)
+
+# function that returns true if values in vector are equal to vals. The function takes a vector x, and specified values of incorrect data
+recode_incorrect <- function(x, vals = c(5)) {
+  test <- x %in% vals
+  ifelse(test, 3, x)
+}
+
+# function that recodes incorrect values to 3. The function takes a dataframe with variables with incorrect data, and specified values of incorrect data
+recode_incorrect_df <- function(df, vals = c(5)) {
+  modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
+}
+
+fix_3.2 <- recode_incorrect_df(fix_3) # applying this function strips out labels
+```
+
+```{r}
+# recoding incorrect values as N/A with function
+
+# vector with incorrect values in dataset
+vals <- c(7)
+
+# function that returns true if values in vector are equal to vals. The function takes a vector x, and specified values of incorrect data
+recode_incorrect <- function(x, vals = c(7)) {
+  test <- x %in% vals
+  ifelse(test, 4, x)
+}
+
+# function that recodes incorrect values to 3. The function takes a dataframe with variables with incorrect data, and specified values of incorrect data
+recode_incorrect_df <- function(df, vals = c(7)) {
+  modify(df, ~recode_incorrect(.x, vals)) # here uses the function created above
+}
+
+fix_3.3 <- recode_incorrect_df(fix_3.2) # applying this function strips out labels
+```
+
+```{r}
+d_fixed_1 <- left_join(fix_1.2, fix_2.2)
+
+d_fixed_2 <- left_join(d_fixed_1, fix_3.3) 
+
+other_vars <- pa_clean %>%
+  select(P0001.1, P4013_5.1, P4014_5.1, P4013_5.2, P4014_5.2, P3001.1:P3010.1, P3001.2:P3010.2, P7001.1:P70012.1, P7001.2:P70012.2)
+
+d_fixed_3 <- left_join(d_fixed_2, other_vars)
+
+```
+
+# recoding missing values as N/A with function
+```{r}
+# vector with missing values in dataset
+missing_vals <- c(-99)
+
+# function that returns true if values in vector are equal to missing_vals. The function takes a vector x, and specified values of missing data
+recode_missing <- function(x, missing_vals = c(-99)) {
+  test <- x %in% missing_vals
+  ifelse(test, NA, x)
+}
+
+# function that recodes missing values to NA. The function takes a dataframe with variables with missing data, and specified values of missing data
+recode_missing_df <- function(df, missing_vals = c(-99)) {
+  modify(df, ~recode_missing(.x, missing_vals)) # here uses the function created above
+}
+
+d_fixed_na <- recode_missing_df(d_fixed_3) # applying this function strips out labels
+
+#view_df(d_fixed_na) # it worked, all items are in 1-4 scales and no -99
+```
+
+# reverse scoring 
+
+```{r}
+d_fixed_na_rv <- d_fixed_na %>%
+  mutate(P2059.1 = likert_reverse(P2059.1, top = 4, bottom = 1),
+         P2061.1 = likert_reverse(P2061.1, top = 4, bottom = 1),
+         P3004.1 = likert_reverse(P3004.1, top = 5, bottom = 1),
+         P3005.1 = likert_reverse(P3005.1, top = 5, bottom = 1),
+         P3007.1 = likert_reverse(P3007.1, top = 5, bottom = 1),
+         P3008.1 = likert_reverse(P3008.1, top = 5, bottom = 1),
+         P70010.1 = likert_reverse(P70010.1, top = 4, bottom = 1),
+         P70011.1 = likert_reverse(P70011.1, top = 4, bottom = 1))
+```
+
+# Common guidelines for evaluating Cronbach's Alpha
+
+.00 to .69 = Poor
+.70 to .79 = Fair 
+.80 to .89 = Good 
+.90 to .99 = Excellent/Strong
+
+### SCALES ###
+
+# Mentor parenting scales
+Items 1 - 62 in section 2
+P2021.1 - P2042.1
+response scale: 1 - 4 (strongly disagree - strongly agree)
+
+# confidence in one's parenting
+higher scores = better
+```{r}
+s01 <- d_fixed_na_rv %>%
+  select(P2021.1, P2025.1, P2027.1, P2028.1, P2029.1, P2032.1, P2033.1) %>%
+  data.frame()
+
+alpha(s01, check.keys=FALSE) # 0.81 (good)
+
+```
+
+# supporting EA
+higher scores = better
+```{r}
+# s02 <- d_fixed_na_rv %>%
+#   select(P2023.1, P2024.1, P2026.1, P2034.1, P2035.1, P2036.1, P2037.1, P2044.1, P2046.1) %>%
+#   data.frame()
+# 
+# alpha(s02, check.keys=FALSE) # 0.77
+
+# removing P2044.1 because it was negatively related to the scale, even though it didn't need to be reverse scored --> the item was a little "tricky". 
+
+s02 <- d_fixed_na_rv %>%
+  select(P2023.1, P2024.1, P2026.1, P2034.1, P2035.1, P2036.1, P2037.1, P2046.1) %>%
+  data.frame()
+
+alpha(s02, check.keys=FALSE) # 0.82 (good)
+```
+
+# treating EA as a child
+higher scores = worse 
+
+```{r}
+s03 <- d_fixed_na_rv %>%
+  select(P2038.1, P2040.1, P2045.1, P2055.1) %>%
+  data.frame()
+
+alpha(s03, check.keys=FALSE) # 0.54 (poor)
+
+# Not using this one, even if taking out P2045.1 = 0.67 (poor) #
+```
+
+# supporting decision-making
+higher scores = better
+```{r}
+s04 <- d_fixed_na_rv %>%
+  select(P2039.1, P2053.1, P2054.1, P2056.1) %>%
+  data.frame()
+
+alpha(s04, check.keys=FALSE) # 0.46 (poor)
+
+# Not using this one, even if taking out P2039.1 = 0.56(poor) #
+
+```
+
+# parenting & EA risky behavior 
+higher scores = better
+```{r}
+s05 <- d_fixed_na_rv %>%
+  select(P2058.1, P2059.1, P2060.1, P2061.1, P2062.1) %>%
+  data.frame()
+
+alpha(s05, check.keys=FALSE) #0.51 (poor)
+
+# Not using this one, even if taking out P2059.1 = 0.69(poor) #
+```
+
+# 02 = PSS-10 (stress scale)
+Items 1 - 10 in section 3
+P3001.1 - P3010.1
+response scale: 0 - 4 (never - very often) --> but coded in qualtrics as 1 - 5 
+higher scores = more stress
+
+item 4 = E3004.1 - reverse scored
+item 5 = E3005.1 - reverse scored
+item 7 = E3007.1 - reverse scored
+item 8 = E3008.1 - reverse scored
+
+```{r}
+
+s06 <- d_fixed_na_rv %>%
+  select(P3001.1:P3010.1) %>% 
+  data.frame() 
+
+alpha(s06, check.keys=FALSE) # 0.83 stress
+```
+
+# SPA general
+P4013_5.1 --> response scales OK
+
+# ENG general
+P4014_5.1 --> response scales OK
+
+
+# trust in EAs' decisions 
+P7001.1 - P70012.1
+response scale: 0 - 3 (not at all true - very true) --> but coded in qualtrics as 1 - 4
+
+```{r}
+
+s06 <- d_fixed_na_rv %>%
+  select(P7007.1, P7008.1, P7009.1, P70010.1, P70011.1, P70012.1) %>% 
+  data.frame() 
+
+alpha(s06, check.keys=FALSE) # 0.77 (fair)
+```
+
+### composite scales with acceptable consistency
+
+```{r}
+composite_scales <- d_fixed_na_rv %>%
+  rowwise() %>% 
+  mutate(CONF.1 = mean(c(P2021.1, P2025.1, P2027.1, P2028.1, P2029.1, P2032.1, P2033.1), na.rm = TRUE),
+         CONF.2 = mean(c(P2021.2, P2025.2, P2027.2, P2028.2, P2029.2, P2032.2, P2033.2), na.rm = TRUE),
+         SUPP.1 = mean(c(P2023.1, P2024.1, P2026.1, P2034.1, P2035.1, P2036.1, P2037.1, P2046.1), na.rm = TRUE),
+         SUPP.2 = mean(c(P2023.2, P2024.2, P2026.2, P2034.2, P2035.2, P2036.2, P2037.2, P2046.2), na.rm = TRUE),
+         PSS.1 = mean(c(P3001.1, P3002.1, P3003.1, P3004.1, P3005.1, P3006.1, P3007.1, P3008.1, P3009.1, P3010.1), na.rm = TRUE),
+         PSS.2 = mean(c(P3001.2, P3002.2, P3003.2, P3004.2, P3005.2, P3006.2, P3007.2, P3008.2, P3009.2, P3010.2), na.rm = TRUE),
+         TRU.1 = mean(c(P7007.1, P7008.1, P7009.1, P70010.1, P70011.1, P70012.1), na.rm = TRUE),
+         TRU.2 = mean(c(P7007.1, P7008.1, P7009.1, P70010.1, P70011.1, P70012.1), na.rm = TRUE)) 
+
+```
+
+```{r}
+id_vars <- pa_clean %>%
+  select(P0001.1, E0002.1, E0003.1, P1003.1, P1003.1_TEXT, LocationRC.1)
+
+reduced_pa <- left_join(id_vars, composite_scales)
+
+```
+
+
+```{r, message=FALSE}
+view_df(pa_clean)
+```
+
+# exporting reduced dataset to SPSS (only variables that were cleaned)
+```{r}
+# reduced_pa %>%
+#   haven::write_sav(here("nopublishlea", "reduced_pa.sav"))
+```
